@@ -2,6 +2,13 @@
 
 TypeScript-first payment infrastructure SDK for Uzbekistan-focused applications.
 
+<p>
+  <a href="#english">English</a> |
+  <a href="#ozbekcha">O'zbekcha</a> |
+  <a href="#russian">Русский</a> |
+  <a href="#interactive-quick-links">Quick Links</a>
+</p>
+
 `uz-payments` helps developers integrate Uzbekistan payment providers with safer
 amount handling, typed provider callbacks, request validation, state modeling,
 framework adapters, and production-oriented documentation.
@@ -11,25 +18,127 @@ any bank, or any other payment provider. Always verify integrations against the
 provider's official documentation and sandbox before production use.
 
 This SDK is a developer integration toolkit. It is not a payment processor, bank,
-merchant account provider, or card processing system. It must never be used to
-store raw card data or expose provider secrets to frontend code.
+merchant account provider, or card processing system. It must never store raw
+card data and must never expose provider secrets to frontend code.
+
+<a id="interactive-quick-links"></a>
+
+## Interactive Quick Links
+
+<details open>
+<summary><strong>Start here</strong></summary>
+
+- [Install packages](#installation)
+- [Quick start](#quick-start)
+- [Payme callback example](#payme-example)
+- [Express adapter](#express)
+- [Next.js App Router adapter](#nextjs-app-router)
+- [Supported providers](#supported-providers)
+- [Security rules](#security-rules)
+- [Development commands](#development)
+
+</details>
+
+<details>
+<summary><strong>Repository areas</strong></summary>
+
+- `packages/core` - money, states, errors, provider contracts, audit/idempotency types
+- `packages/payme` - Payme Merchant API provider
+- `packages/express` - Express adapter
+- `packages/next` - Next.js App Router adapter
+- `examples/express-postgres` - Express + PostgreSQL-style example
+- `examples/nextjs-app-router` - Next.js App Router example
+- `docs` - provider roadmap, security, database, state machine, testing docs
+
+</details>
+
+<a id="english"></a>
+
+## English
+
+`uz-payments` is an open-source TypeScript-first payment infrastructure SDK for
+Uzbekistan-focused applications: e-commerce, SaaS, Telegram bots, marketplaces,
+CRM systems, delivery platforms, online education platforms, and service
+businesses.
+
+The MVP implements:
+
+- `@uz-payments/core`
+- `@uz-payments/payme`
+- `@uz-payments/express`
+- `@uz-payments/next`
+
+Click, Uzum, inPAY, Paynet, Apelsin, and bank gateways are planned only in
+roadmap documentation until their official merchant flows are verified.
+
+<a id="ozbekcha"></a>
+
+## O'zbekcha
+
+`uz-payments` - O'zbekiston bozoriga yo'naltirilgan ilovalar uchun
+TypeScript-first ochiq manbali to'lov infratuzilmasi SDK.
+
+U e-commerce, SaaS, Telegram botlar, marketplace, CRM, yetkazib berish,
+onlayn ta'lim va xizmat ko'rsatish bizneslariga to'lov provayderlarini xavfsiz
+va tartibli integratsiya qilishga yordam beradi.
+
+MVP tarkibi:
+
+- `@uz-payments/core`
+- `@uz-payments/payme`
+- `@uz-payments/express`
+- `@uz-payments/next`
+
+Click, Uzum, inPAY, Paynet, Apelsin va bank gateway integratsiyalari hozircha
+faqat roadmap hujjatlarida turadi. Ular rasmiy merchant flow, autentifikatsiya,
+xatolik mapping va test strategiyasi tekshirilmaguncha source package sifatida
+qo'shilmaydi.
+
+Muhim qoida: SDK raw card data saqlamaydi va provider secret qiymatlarini
+frontend kodga chiqarmaydi.
+
+<a id="russian"></a>
+
+## Русский
+
+`uz-payments` - open-source TypeScript-first SDK для платежной инфраструктуры
+приложений, ориентированных на рынок Узбекистана.
+
+Проект помогает безопаснее интегрировать платежных провайдеров в e-commerce,
+SaaS, Telegram-боты, marketplace-платформы, CRM, доставку, онлайн-образование и
+сервисные бизнесы.
+
+MVP включает:
+
+- `@uz-payments/core`
+- `@uz-payments/payme`
+- `@uz-payments/express`
+- `@uz-payments/next`
+
+Click, Uzum, inPAY, Paynet, Apelsin и банковские gateway-интеграции пока
+описаны только в roadmap. Они не будут добавлены как source packages, пока не
+будут проверены официальные merchant flow, аутентификация, mapping ошибок и
+стратегия тестирования.
+
+Важное правило: SDK не хранит raw card data и не передает provider secrets во
+frontend-код.
 
 ## Supported Providers
 
-| Provider | Status |
-|---|---|
-| Payme | MVP implementation |
-| Click | Planned |
-| Uzum | Planned |
-| inPAY | Planned |
-| Paynet | Planned |
-| Apelsin | Planned |
-| Bank gateways | Research required |
+| Provider      | Status             |
+| ------------- | ------------------ |
+| Payme         | MVP implementation |
+| Click         | Planned            |
+| Uzum          | Planned            |
+| inPAY         | Planned            |
+| Paynet        | Planned            |
+| Apelsin       | Planned            |
+| Bank gateways | Research required  |
 
 Unsupported providers are documented only in the roadmap. They are not faked in
 source code.
 
-## Packages
+## Installation
 
 ```bash
 pnpm add @uz-payments/core @uz-payments/payme
@@ -44,8 +153,7 @@ MVP workspace packages:
 - `@uz-payments/express`
 - `@uz-payments/next`
 
-Future providers should be added as separate packages only after official flows
-are verified:
+Future provider packages should be added only after official flows are verified:
 
 - `@uz-payments/click`
 - `@uz-payments/uzum`
@@ -215,6 +323,44 @@ Use `canTransition` for checks and `assertCanTransition` or
 12. Keep provider credentials only in server-side environment variables.
 13. Treat all provider callbacks as untrusted input until validated.
 
+<details>
+<summary><strong>Security rules in O'zbekcha</strong></summary>
+
+1. Raw card data saqlamang.
+2. Provider secret qiymatlarini frontendga chiqarmang.
+3. Webhook/request autentifikatsiyasini doim tekshiring.
+4. Production muhitida HTTPS ishlating.
+5. Order amount qiymatini doim server-side tekshiring.
+6. Business action bajarishdan oldin transaction holatini saqlang.
+7. Create/perform/cancel callbacklarini idempotent qiling.
+8. Productiondan oldin sandboxda test qiling.
+9. Frontenddan kelgan amount/order ma'lumotiga ishonmang.
+10. Secretlarni log qilmang.
+11. Production payment state uchun in-memory store ishlatmang.
+12. Credentiallarni faqat server-side environment variablelarda saqlang.
+13. Provider callbacklarini validationdan oldin ishonchsiz input deb hisoblang.
+
+</details>
+
+<details>
+<summary><strong>Правила безопасности на русском</strong></summary>
+
+1. Не храните raw card data.
+2. Не передавайте provider secrets во frontend.
+3. Всегда проверяйте аутентификацию webhook/request.
+4. Используйте HTTPS в production.
+5. Всегда проверяйте сумму заказа на сервере.
+6. Сначала сохраняйте transaction, затем выполняйте бизнес-действие.
+7. Делайте create/perform/cancel callbacks идемпотентными.
+8. Перед production тестируйте интеграцию в sandbox.
+9. Не доверяйте amount/order данным из frontend.
+10. Не логируйте secrets.
+11. Не используйте in-memory storage для production payment state.
+12. Храните credentials только в server-side environment variables.
+13. Считайте provider callbacks недоверенным input до validation.
+
+</details>
+
 ## Development
 
 ```bash
@@ -222,6 +368,7 @@ pnpm install
 pnpm test
 pnpm typecheck
 pnpm build
+pnpm lint
 ```
 
 ## Documentation
