@@ -378,7 +378,9 @@ pnpm lint
 - `docs/state-machine.md`
 - `docs/provider-contract.md`
 - `docs/provider-roadmap.md`
+- `docs/payme-production-checklist.md`
 - `docs/production-checklist.md`
+- `docs/reconciliation.md`
 
 ## Contributing
 

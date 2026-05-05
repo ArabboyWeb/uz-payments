@@ -43,6 +43,10 @@ export function assertPaymeBasicAuth(
     throw new UnauthorizedWebhookError("Invalid Payme Basic authorization header");
   }
 
+  // Payme Business docs define Basic auth as base64(login:password), where the
+  // login is issued by Payme technical support and the password is the cashbox
+  // key. Many integrations use "Paycom"; production merchants should configure
+  // the exact login from their current Payme Business account.
   const username = options.basicAuthUsername ?? "Paycom";
   const expected = `${username}:${options.secretKey}`;
 

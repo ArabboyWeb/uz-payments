@@ -5,9 +5,13 @@ export type PaymeErrorKey =
   | "TRANSACTION_NOT_FOUND"
   | "TRANSACTION_ALREADY_DONE"
   | "TRANSACTION_CANCELLED"
+  | "CANNOT_CANCEL_AFTER_DELIVERY"
   | "UNAUTHORIZED"
   | "INVALID_REQUEST"
-  | "METHOD_NOT_FOUND";
+  | "METHOD_NOT_FOUND"
+  | "METHOD_NOT_POST"
+  | "PARSE_ERROR"
+  | "SYSTEM_ERROR";
 
 export interface PaymeErrorDefinition {
   key: PaymeErrorKey;
@@ -17,12 +21,15 @@ export interface PaymeErrorDefinition {
     uz: string;
     en: string;
   };
+  data?: string;
 }
 
 /**
- * Merchant-side defaults for common Payme failures.
- * Verify exact provider codes, messages, and edge cases against Payme's current
- * official Merchant API documentation before production use.
+ * Merchant-side defaults based on Payme Business Merchant API docs.
+ *
+ * Provider-specific behavior can still vary by merchant account setup. Before
+ * production, verify messages, account subfield names in `data`, and edge-case
+ * retry behavior in Payme Business sandbox with the merchant's current docs.
  */
 export const PAYME_ERRORS: Record<PaymeErrorKey, PaymeErrorDefinition> = {
   ORDER_NOT_FOUND: {
@@ -32,7 +39,8 @@ export const PAYME_ERRORS: Record<PaymeErrorKey, PaymeErrorDefinition> = {
       ru: "Заказ не найден",
       uz: "Buyurtma topilmadi",
       en: "Order not found"
-    }
+    },
+    data: "account"
   },
   INVALID_AMOUNT: {
     key: "INVALID_AMOUNT",
@@ -72,11 +80,20 @@ export const PAYME_ERRORS: Record<PaymeErrorKey, PaymeErrorDefinition> = {
   },
   TRANSACTION_CANCELLED: {
     key: "TRANSACTION_CANCELLED",
-    code: -31007,
+    code: -31008,
     message: {
       ru: "Транзакция отменена",
       uz: "Tranzaksiya bekor qilingan",
       en: "Transaction cancelled"
+    }
+  },
+  CANNOT_CANCEL_AFTER_DELIVERY: {
+    key: "CANNOT_CANCEL_AFTER_DELIVERY",
+    code: -31007,
+    message: {
+      ru: "Невозможно отменить транзакцию. Товар или услуга предоставлена покупателю в полном объеме.",
+      uz: "Tranzaksiyani bekor qilib bo'lmaydi. Tovar yoki xizmat to'liq taqdim etilgan.",
+      en: "Cannot cancel transaction after goods or services were fully provided"
     }
   },
   UNAUTHORIZED: {
@@ -105,6 +122,33 @@ export const PAYME_ERRORS: Record<PaymeErrorKey, PaymeErrorDefinition> = {
       uz: "Metod topilmadi",
       en: "Method not found"
     }
+  },
+  METHOD_NOT_POST: {
+    key: "METHOD_NOT_POST",
+    code: -32300,
+    message: {
+      ru: "Метод запроса должен быть POST",
+      uz: "So'rov metodi POST bo'lishi kerak",
+      en: "Request method must be POST"
+    }
+  },
+  PARSE_ERROR: {
+    key: "PARSE_ERROR",
+    code: -32700,
+    message: {
+      ru: "Ошибка парсинга JSON",
+      uz: "JSON parse xatosi",
+      en: "JSON parse error"
+    }
+  },
+  SYSTEM_ERROR: {
+    key: "SYSTEM_ERROR",
+    code: -32400,
+    message: {
+      ru: "Системная ошибка",
+      uz: "Tizim xatosi",
+      en: "System error"
+    }
   }
 };
 
@@ -116,6 +160,6 @@ export class PaymeMerchantError extends Error {
     super(PAYME_ERRORS[key].message.en);
     this.name = "PaymeMerchantError";
     this.definition = PAYME_ERRORS[key];
-    this.data = data;
+    this.data = data ?? PAYME_ERRORS[key].data;
   }
 }

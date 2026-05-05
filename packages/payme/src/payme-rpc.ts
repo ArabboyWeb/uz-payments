@@ -2,7 +2,12 @@ import { z } from "zod";
 import { InvalidProviderPayloadError, ProviderMethodNotSupportedError } from "@uz-payments/core";
 
 import { PAYME_ERRORS, PaymeMerchantError } from "./payme-errors";
-import type { PaymeJsonRpcId, PaymeJsonRpcRequest, PaymeJsonRpcResponse, PaymeMethod } from "./payme-types";
+import type {
+  PaymeJsonRpcId,
+  PaymeJsonRpcRequest,
+  PaymeJsonRpcResponse,
+  PaymeMethod
+} from "./payme-types";
 
 export const PAYME_METHODS: readonly PaymeMethod[] = [
   "CheckPerformTransaction",
@@ -14,6 +19,13 @@ export const PAYME_METHODS: readonly PaymeMethod[] = [
 ];
 
 const rpcIdSchema = z.union([z.string(), z.number(), z.null()]).optional();
+const paymeTimestampSchema = z
+  .number()
+  .int()
+  .safe()
+  .refine((value) => value >= 1_000_000_000_000 && value <= 9_999_999_999_999, {
+    message: "Payme timestamp must be a positive 13-digit millisecond value"
+  });
 
 export const paymeRequestSchema = z.object({
   jsonrpc: z.literal("2.0").optional(),
@@ -22,16 +34,18 @@ export const paymeRequestSchema = z.object({
   params: z.unknown().optional()
 });
 
-const accountSchema = z.record(z.union([z.string(), z.number(), z.boolean(), z.null(), z.undefined()]));
+const accountSchema = z.record(
+  z.union([z.string(), z.number(), z.boolean(), z.null(), z.undefined()])
+);
 
 export const checkPerformParamsSchema = z.object({
-  amount: z.number().int().nonnegative().safe(),
+  amount: z.number().int().positive().safe(),
   account: accountSchema
 });
 
 export const createTransactionParamsSchema = checkPerformParamsSchema.extend({
   id: z.string().min(1),
-  time: z.number().int().nonnegative()
+  time: paymeTimestampSchema
 });
 
 export const transactionIdParamsSchema = z.object({
@@ -39,12 +53,12 @@ export const transactionIdParamsSchema = z.object({
 });
 
 export const cancelTransactionParamsSchema = transactionIdParamsSchema.extend({
-  reason: z.number().int().optional()
+  reason: z.number().int()
 });
 
 export const statementParamsSchema = z.object({
-  from: z.number().int().nonnegative(),
-  to: z.number().int().nonnegative()
+  from: paymeTimestampSchema,
+  to: paymeTimestampSchema
 });
 
 export function parsePaymeRequest(payload: unknown): PaymeJsonRpcRequest {
@@ -65,17 +79,21 @@ export function assertSupportedPaymeMethod(method: string): asserts method is Pa
   }
 }
 
-export function successResponse(id: PaymeJsonRpcId | undefined, result: Record<string, unknown>): PaymeJsonRpcResponse {
+export function successResponse(
+  id: PaymeJsonRpcId | undefined,
+  result: Record<string, unknown>
+): PaymeJsonRpcResponse {
   return {
-    jsonrpc: "2.0",
     id: id ?? null,
     result
   };
 }
 
-export function errorResponse(id: PaymeJsonRpcId | undefined, error: PaymeMerchantError): PaymeJsonRpcResponse {
+export function errorResponse(
+  id: PaymeJsonRpcId | undefined,
+  error: PaymeMerchantError
+): PaymeJsonRpcResponse {
   return {
-    jsonrpc: "2.0",
     id: id ?? null,
     error: {
       code: error.definition.code,
@@ -85,11 +103,13 @@ export function errorResponse(id: PaymeJsonRpcId | undefined, error: PaymeMercha
   };
 }
 
-export function invalidRequestResponse(id: PaymeJsonRpcId | undefined, data?: string): PaymeJsonRpcResponse {
+export function invalidRequestResponse(
+  id: PaymeJsonRpcId | undefined,
+  data?: string
+): PaymeJsonRpcResponse {
   const definition = PAYME_ERRORS.INVALID_REQUEST;
 
   return {
-    jsonrpc: "2.0",
     id: id ?? null,
     error: {
       code: definition.code,
@@ -99,11 +119,26 @@ export function invalidRequestResponse(id: PaymeJsonRpcId | undefined, data?: st
   };
 }
 
-export function methodNotFoundResponse(id: PaymeJsonRpcId | undefined): PaymeJsonRpcResponse {
+export function methodNotFoundResponse(
+  id: PaymeJsonRpcId | undefined,
+  method?: string
+): PaymeJsonRpcResponse {
   const definition = PAYME_ERRORS.METHOD_NOT_FOUND;
 
   return {
-    jsonrpc: "2.0",
+    id: id ?? null,
+    error: {
+      code: definition.code,
+      message: definition.message,
+      ...(method ? { data: method } : {})
+    }
+  };
+}
+
+export function parseErrorResponse(id: PaymeJsonRpcId | undefined): PaymeJsonRpcResponse {
+  const definition = PAYME_ERRORS.PARSE_ERROR;
+
+  return {
     id: id ?? null,
     error: {
       code: definition.code,

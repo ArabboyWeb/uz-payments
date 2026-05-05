@@ -55,7 +55,16 @@ function toSafePaymeError(error: unknown): PaymeMerchantError {
     return new PaymeMerchantError("INVALID_REQUEST");
   }
 
-  return new PaymeMerchantError("CANNOT_PERFORM");
+  return new PaymeMerchantError("SYSTEM_ERROR");
+}
+
+function extractRequestMethod(payload: unknown): string | undefined {
+  if (typeof payload !== "object" || payload === null || !("method" in payload)) {
+    return undefined;
+  }
+
+  const method = (payload as { method?: unknown }).method;
+  return typeof method === "string" ? method : undefined;
 }
 
 export async function handlePaymeRpcRequest(
@@ -95,7 +104,8 @@ export async function handlePaymeRpcRequest(
       return successResponse(request.id, {
         create_time: result.create_time,
         transaction: result.transaction ?? params.id,
-        state: result.state ?? 1
+        state: result.state ?? 1,
+        ...(result.receivers !== undefined ? { receivers: result.receivers } : {})
       });
     }
 
@@ -137,11 +147,11 @@ export async function handlePaymeRpcRequest(
 
       return successResponse(request.id, {
         create_time: result.create_time,
-        ...(result.perform_time !== undefined ? { perform_time: result.perform_time } : {}),
-        ...(result.cancel_time !== undefined ? { cancel_time: result.cancel_time } : {}),
+        perform_time: result.perform_time ?? 0,
+        cancel_time: result.cancel_time ?? 0,
         transaction: result.transaction ?? params.id,
         state: result.state,
-        ...(result.reason !== undefined ? { reason: result.reason } : {})
+        reason: result.reason ?? null
       });
     }
 
@@ -167,6 +177,7 @@ export async function safeHandlePaymeRpcRequest(
   authenticate: () => void
 ): Promise<PaymeJsonRpcResponse> {
   const id = extractRequestId(payload);
+  const method = extractRequestMethod(payload);
 
   try {
     authenticate();
@@ -174,7 +185,7 @@ export async function safeHandlePaymeRpcRequest(
     return await handlePaymeRpcRequest(request, callbacks);
   } catch (error) {
     if (error instanceof ProviderMethodNotSupportedError) {
-      return methodNotFoundResponse(id);
+      return methodNotFoundResponse(id, method);
     }
 
     if (error instanceof InvalidProviderPayloadError) {

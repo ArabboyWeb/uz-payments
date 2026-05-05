@@ -18,6 +18,15 @@ describe("Payme auth", () => {
     ).not.toThrow();
   });
 
+  it("accepts the configured Payme Basic auth login", () => {
+    expect(() =>
+      assertPaymeBasicAuth(
+        { authorization: basic("merchant-login:secret") },
+        { ...options, basicAuthUsername: "merchant-login" }
+      )
+    ).not.toThrow();
+  });
+
   it("rejects unauthorized requests", () => {
     expect(() => assertPaymeBasicAuth({}, options)).toThrow(UnauthorizedWebhookError);
     expect(() => assertPaymeBasicAuth({ authorization: basic("Paycom:wrong") }, options)).toThrow(

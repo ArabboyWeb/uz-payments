@@ -1,5 +1,10 @@
 import type { Request, Response } from "express";
-import { invalidRequestResponse, type PaymeCallbacks, type PaymeProvider } from "@uz-payments/payme";
+import {
+  invalidRequestResponse,
+  parseErrorResponse,
+  type PaymeCallbacks,
+  type PaymeProvider
+} from "@uz-payments/payme";
 
 async function readJsonBody(req: Request): Promise<unknown> {
   if (req.body !== undefined) {
@@ -25,8 +30,12 @@ export function createPaymeExpressHandler(provider: PaymeProvider, callbacks: Pa
       const payload = await readJsonBody(req);
       const response = await provider.handleRequest(payload, req.headers, callbacks);
       res.status(200).json(response);
-    } catch {
-      res.status(200).json(invalidRequestResponse(null));
+    } catch (error) {
+      res
+        .status(200)
+        .json(
+          error instanceof SyntaxError ? parseErrorResponse(null) : invalidRequestResponse(null)
+        );
     }
   };
 }

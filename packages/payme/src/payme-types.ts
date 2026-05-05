@@ -27,12 +27,10 @@ export interface PaymeJsonRpcError {
 
 export type PaymeJsonRpcResponse =
   | {
-      jsonrpc: "2.0";
       id: PaymeJsonRpcId;
       result: Record<string, unknown>;
     }
   | {
-      jsonrpc: "2.0";
       id: PaymeJsonRpcId;
       error: PaymeJsonRpcError;
     };
@@ -40,6 +38,11 @@ export type PaymeJsonRpcResponse =
 export type PaymeAccount = Record<string, string | number | boolean | null | undefined>;
 
 export type PaymeTransactionState = 1 | 2 | -1 | -2;
+
+export interface PaymeReceiver {
+  id: string;
+  amount: number;
+}
 
 export interface PaymeBaseCallbackContext {
   rawPayload: PaymeJsonRpcRequest;
@@ -78,6 +81,7 @@ export interface PaymeCreateTransactionResult {
   create_time: number;
   transaction?: string;
   state?: PaymeTransactionState;
+  receivers?: PaymeReceiver[] | null;
 }
 
 export interface PaymePerformTransactionResult {
@@ -112,6 +116,7 @@ export interface PaymeStatementTransaction {
   transaction?: string;
   state: PaymeTransactionState;
   reason?: number;
+  receivers?: PaymeReceiver[] | null;
 }
 
 export interface PaymeGetStatementResult {
