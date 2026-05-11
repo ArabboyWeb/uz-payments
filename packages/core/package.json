@@ -3,6 +3,24 @@
   "version": "0.1.0",
   "description": "Core payment primitives for uz-payments.",
   "license": "MIT",
+  "author": "uz-payments contributors",
+  "homepage": "https://github.com/ArabboyWeb/uz-payments/tree/main/packages/core#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArabboyWeb/uz-payments.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/ArabboyWeb/uz-payments/issues"
+  },
+  "keywords": [
+    "uzbekistan",
+    "payments",
+    "money",
+    "state-machine",
+    "typescript",
+    "sdk"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -14,7 +32,13 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean",
     "typecheck": "tsc --noEmit"

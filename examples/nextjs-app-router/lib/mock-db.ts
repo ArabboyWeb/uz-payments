@@ -14,6 +14,15 @@ interface Transaction {
   createTime: number;
   performTime?: number;
   cancelTime?: number;
+  rawPayload?: Record<string, unknown>;
+}
+
+interface AuditEvent {
+  event: string;
+  providerTransactionId?: string;
+  orderId?: string;
+  safePayload: Record<string, unknown>;
+  createdAt: Date;
 }
 
 const orders = new Map<string, Order>([
@@ -21,8 +30,13 @@ const orders = new Map<string, Order>([
 ]);
 
 const transactions = new Map<string, Transaction>();
+const auditEvents: AuditEvent[] = [];
 
 export const db = {
+  async withPaymentTransaction<T>(fn: () => Promise<T>): Promise<T> {
+    // Production code should use a real database transaction here.
+    return fn();
+  },
   async findOrder(id: string): Promise<Order | null> {
     return orders.get(id) ?? null;
   },
@@ -35,10 +49,22 @@ export const db = {
   async upsertTransaction(input: Transaction): Promise<Transaction> {
     const existing = transactions.get(input.id);
     if (existing) {
+      await this.recordAudit({
+        event: "payme.create.duplicate",
+        providerTransactionId: existing.id,
+        orderId: existing.orderId,
+        safePayload: { state: existing.state }
+      });
       return existing;
     }
 
     transactions.set(input.id, input);
+    await this.recordAudit({
+      event: "payme.create.stored",
+      providerTransactionId: input.id,
+      orderId: input.orderId,
+      safePayload: { amountTiyin: input.amountTiyin, state: input.state }
+    });
     return input;
   },
   async findTransaction(id: string): Promise<Transaction | null> {
@@ -63,5 +89,11 @@ export const db = {
     return [...transactions.values()].filter((transaction) => {
       return transaction.createTime >= from && transaction.createTime <= to;
     });
+  },
+  async recordAudit(input: Omit<AuditEvent, "createdAt">): Promise<void> {
+    auditEvents.push({ ...input, createdAt: new Date() });
+  },
+  async listAuditEvents(): Promise<AuditEvent[]> {
+    return auditEvents;
   }
 };

@@ -4,6 +4,23 @@
   "private": true,
   "description": "TypeScript-first payment infrastructure SDK for Uzbekistan-focused applications.",
   "license": "MIT",
+  "author": "uz-payments contributors",
+  "homepage": "https://github.com/ArabboyWeb/uz-payments#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArabboyWeb/uz-payments.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ArabboyWeb/uz-payments/issues"
+  },
+  "keywords": [
+    "uzbekistan",
+    "payments",
+    "payme",
+    "merchant-api",
+    "typescript",
+    "sdk"
+  ],
   "type": "module",
   "packageManager": "pnpm@9.15.0",
   "engines": {

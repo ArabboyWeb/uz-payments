@@ -1,4 +1,4 @@
-import { PaymeProvider, type PaymeCallbacks } from "@uz-payments/payme";
+import { PaymeMerchantError, PaymeProvider, type PaymeCallbacks } from "@uz-payments/payme";
 
 import { db } from "./mock-db";
 
@@ -13,7 +13,7 @@ export const callbacks: PaymeCallbacks = {
     const order = await db.findOrder(orderId);
 
     if (!order) {
-      return { ok: false, reason: "ORDER_NOT_FOUND" };
+      return { ok: false, reason: "ORDER_NOT_FOUND", data: "order_id" };
     }
 
     if (order.amountTiyin !== ctx.amount) {
@@ -29,7 +29,8 @@ export const callbacks: PaymeCallbacks = {
       orderId: String(ctx.account.order_id ?? ""),
       amountTiyin: ctx.amount,
       state: "CREATED",
-      createTime: Date.now()
+      createTime: Date.now(),
+      rawPayload: ctx.rawPayload as unknown as Record<string, unknown>
     });
 
     return { create_time: transaction.createTime, state: 1 };
@@ -37,27 +38,67 @@ export const callbacks: PaymeCallbacks = {
 
   async performTransaction(ctx) {
     const now = Date.now();
-    const transaction = await db.setTransactionState(ctx.transactionId, "CONFIRMED", "performTime", now);
+    const transaction = await db.withPaymentTransaction(async () => {
+      const updated = await db.setTransactionState(
+        ctx.transactionId,
+        "CONFIRMED",
+        "performTime",
+        now
+      );
+      if (updated) {
+        await db.markOrderPaid(updated.orderId);
+        await db.recordAudit({
+          event: "payme.perform.confirmed",
+          providerTransactionId: ctx.transactionId,
+          orderId: updated.orderId,
+          safePayload: { performTime: updated.performTime ?? now }
+        });
+      }
+      return updated;
+    });
 
     if (!transaction) {
-      throw new Error("Transaction not found");
+      throw new PaymeMerchantError("TRANSACTION_NOT_FOUND");
     }
 
-    await db.markOrderPaid(transaction.orderId);
     return { perform_time: transaction.performTime ?? now, state: 2 };
   },
 
   async cancelTransaction(ctx) {
     const now = Date.now();
-    const transaction = await db.setTransactionState(ctx.transactionId, "CANCELLED", "cancelTime", now);
+    const existing = await db.findTransaction(ctx.transactionId);
+    if (!existing) {
+      throw new PaymeMerchantError("TRANSACTION_NOT_FOUND");
+    }
 
-    return { cancel_time: transaction?.cancelTime ?? now, state: -1 };
+    const transaction = await db.withPaymentTransaction(async () => {
+      const updated = await db.setTransactionState(
+        ctx.transactionId,
+        "CANCELLED",
+        "cancelTime",
+        now
+      );
+      if (updated) {
+        await db.recordAudit({
+          event: "payme.cancel.stored",
+          providerTransactionId: ctx.transactionId,
+          orderId: updated.orderId,
+          safePayload: { cancelTime: updated.cancelTime ?? now, reason: ctx.reason }
+        });
+      }
+      return updated;
+    });
+
+    return {
+      cancel_time: transaction?.cancelTime ?? now,
+      state: existing.state === "CONFIRMED" ? -2 : -1
+    };
   },
 
   async checkTransaction(ctx) {
     const transaction = await db.findTransaction(ctx.transactionId);
     if (!transaction) {
-      throw new Error("Transaction not found");
+      throw new PaymeMerchantError("TRANSACTION_NOT_FOUND");
     }
 
     return {

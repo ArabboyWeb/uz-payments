@@ -1,6 +1,6 @@
 import express from "express";
 import { createPaymeExpressHandler } from "@uz-payments/express";
-import { PaymeProvider, type PaymeCallbacks } from "@uz-payments/payme";
+import { PaymeMerchantError, PaymeProvider, type PaymeCallbacks } from "@uz-payments/payme";
 
 import { db } from "./mock-db";
 
@@ -19,7 +19,7 @@ const callbacks: PaymeCallbacks = {
     const order = await db.orders.findById(orderId);
 
     if (!order) {
-      return { ok: false, reason: "ORDER_NOT_FOUND" };
+      return { ok: false, reason: "ORDER_NOT_FOUND", data: "order_id" };
     }
 
     if (order.amountTiyin !== ctx.amount) {
@@ -53,26 +53,51 @@ const callbacks: PaymeCallbacks = {
   async performTransaction(ctx) {
     const transaction = await db.transactions.findByProviderId(ctx.transactionId);
     if (!transaction) {
-      throw new Error("Transaction not found");
+      throw new PaymeMerchantError("TRANSACTION_NOT_FOUND");
     }
 
-    const performTime = Date.now();
-    await db.transactions.markConfirmed(ctx.transactionId, performTime);
-    await db.orders.markPaid(transaction.orderId);
+    const performTime = transaction.performTime ?? Date.now();
+    await db.withPaymentTransaction(async () => {
+      await db.transactions.markConfirmed(ctx.transactionId, performTime);
+      await db.orders.markPaid(transaction.orderId);
+      await db.audit.record({
+        provider: "payme",
+        event: "payme.perform.confirmed",
+        providerTransactionId: ctx.transactionId,
+        orderId: transaction.orderId,
+        safePayload: { performTime }
+      });
+    });
 
-    return { perform_time: transaction.performTime ?? performTime, state: 2 };
+    return { perform_time: performTime, state: 2 };
   },
 
   async cancelTransaction(ctx) {
-    const cancelTime = Date.now();
-    await db.transactions.cancel(ctx.transactionId, cancelTime);
-    return { cancel_time: cancelTime, state: -1 };
+    const transaction = await db.transactions.findByProviderId(ctx.transactionId);
+    if (!transaction) {
+      throw new PaymeMerchantError("TRANSACTION_NOT_FOUND");
+    }
+
+    const previousState = transaction.state;
+    const cancelTime = transaction.cancelTime ?? Date.now();
+    await db.withPaymentTransaction(async () => {
+      await db.transactions.cancel(ctx.transactionId, cancelTime);
+      await db.audit.record({
+        provider: "payme",
+        event: "payme.cancel.stored",
+        providerTransactionId: ctx.transactionId,
+        orderId: transaction.orderId,
+        safePayload: { cancelTime, reason: ctx.reason }
+      });
+    });
+
+    return { cancel_time: cancelTime, state: previousState === "CONFIRMED" ? -2 : -1 };
   },
 
   async checkTransaction(ctx) {
     const transaction = await db.transactions.findByProviderId(ctx.transactionId);
     if (!transaction) {
-      throw new Error("Transaction not found");
+      throw new PaymeMerchantError("TRANSACTION_NOT_FOUND");
     }
 
     return {

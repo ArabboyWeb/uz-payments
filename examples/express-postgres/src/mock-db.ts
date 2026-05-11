@@ -18,13 +18,27 @@ export interface PaymentTransaction {
   rawPayload: Record<string, unknown>;
 }
 
+export interface PaymentAuditEvent {
+  provider: "payme";
+  event: string;
+  providerTransactionId?: string;
+  orderId?: string;
+  safePayload: Record<string, unknown>;
+  createdAt: Date;
+}
+
 const orders = new Map<string, Order>([
   ["order_100", { id: "order_100", amountTiyin: 125000, paid: false }]
 ]);
 
 const transactions = new Map<string, PaymentTransaction>();
+const auditEvents: PaymentAuditEvent[] = [];
 
 export const db = {
+  async withPaymentTransaction<T>(fn: () => Promise<T>): Promise<T> {
+    // Production code should use a real database transaction here.
+    return fn();
+  },
   orders: {
     async findById(id: string): Promise<Order | null> {
       return orders.get(id) ?? null;
@@ -43,10 +57,24 @@ export const db = {
     async create(input: PaymentTransaction): Promise<PaymentTransaction> {
       const existing = transactions.get(input.providerTransactionId);
       if (existing) {
+        await db.audit.record({
+          provider: "payme",
+          event: "payme.create.duplicate",
+          providerTransactionId: existing.providerTransactionId,
+          orderId: existing.orderId,
+          safePayload: { state: existing.state }
+        });
         return existing;
       }
 
       transactions.set(input.providerTransactionId, input);
+      await db.audit.record({
+        provider: "payme",
+        event: "payme.create.stored",
+        providerTransactionId: input.providerTransactionId,
+        orderId: input.orderId,
+        safePayload: { amountTiyin: input.amountTiyin, state: input.state }
+      });
       return input;
     },
     async markConfirmed(providerTransactionId: string, performTime: number): Promise<void> {
@@ -67,6 +95,14 @@ export const db = {
       return [...transactions.values()].filter((transaction) => {
         return transaction.createTime >= from && transaction.createTime <= to;
       });
+    }
+  },
+  audit: {
+    async record(input: Omit<PaymentAuditEvent, "createdAt">): Promise<void> {
+      auditEvents.push({ ...input, createdAt: new Date() });
+    },
+    async list(): Promise<PaymentAuditEvent[]> {
+      return auditEvents;
     }
   }
 };

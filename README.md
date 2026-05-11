@@ -379,6 +379,7 @@ pnpm lint
 - `docs/provider-contract.md`
 - `docs/provider-roadmap.md`
 - `docs/payme-production-checklist.md`
+- `docs/payme-validation-report.md`
 - `docs/production-checklist.md`
 - `docs/reconciliation.md`
 
