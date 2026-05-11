@@ -34,19 +34,28 @@ export class InvalidProviderPayloadError extends UzPaymentsError {
 }
 
 export class UnauthorizedWebhookError extends UzPaymentsError {
-  constructor(message = "Unauthorized provider request", details?: Record<string, unknown> | undefined) {
+  constructor(
+    message = "Unauthorized provider request",
+    details?: Record<string, unknown> | undefined
+  ) {
     super({ code: "UNAUTHORIZED_WEBHOOK", message, details });
   }
 }
 
 export class InvalidStateTransitionError extends UzPaymentsError {
-  constructor(message = "Invalid payment state transition", details?: Record<string, unknown> | undefined) {
+  constructor(
+    message = "Invalid payment state transition",
+    details?: Record<string, unknown> | undefined
+  ) {
     super({ code: "INVALID_STATE_TRANSITION", message, details });
   }
 }
 
 export class ProviderMethodNotSupportedError extends UzPaymentsError {
-  constructor(message = "Provider method is not supported", details?: Record<string, unknown> | undefined) {
+  constructor(
+    message = "Provider method is not supported",
+    details?: Record<string, unknown> | undefined
+  ) {
     super({ code: "PROVIDER_METHOD_NOT_SUPPORTED", message, details });
   }
 }
@@ -58,7 +67,10 @@ export class IdempotencyConflictError extends UzPaymentsError {
 }
 
 export class ProviderConfigurationError extends UzPaymentsError {
-  constructor(message = "Invalid provider configuration", details?: Record<string, unknown> | undefined) {
+  constructor(
+    message = "Invalid provider configuration",
+    details?: Record<string, unknown> | undefined
+  ) {
     super({ code: "PROVIDER_CONFIGURATION_ERROR", message, details });
   }
 }

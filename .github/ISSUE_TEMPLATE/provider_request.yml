@@ -1,0 +1,37 @@
+name: Provider request
+description: Request support for a future Uzbekistan payment provider.
+title: "provider: "
+labels: ["provider", "needs-verification"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Provider packages are added only when official merchant documentation, authentication, sandbox/testing strategy, error mapping, and idempotency behavior are verified.
+  - type: input
+    id: provider
+    attributes:
+      label: Provider name
+      placeholder: "Click, Uzum, inPAY, Paynet, Apelsin, bank gateway"
+    validations:
+      required: true
+  - type: textarea
+    id: docs
+    attributes:
+      label: Official merchant documentation links
+      description: Link only official provider documentation or merchant portal docs.
+    validations:
+      required: true
+  - type: textarea
+    id: auth
+    attributes:
+      label: Authentication and callback flow
+      description: Summarize verified auth, callback/webhook flow, and sandbox availability.
+    validations:
+      required: true
+  - type: textarea
+    id: idempotency
+    attributes:
+      label: Idempotency and error mapping
+      description: Describe retry behavior and known error codes.
+    validations:
+      required: true

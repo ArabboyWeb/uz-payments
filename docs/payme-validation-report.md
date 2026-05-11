@@ -133,6 +133,10 @@ the previous hardening changes.
 Live Payme-hosted sandbox validation remains pending because credentials and a
 registered callback URL are not available in this environment.
 
+The first public npm release can be prepared with this local harness, but the
+project should not claim live Payme production readiness until this report is
+updated with real Payme sandbox timestamps, request IDs, and observed responses.
+
 ## Fixes Applied
 
 No architecture changes were made.

@@ -1,0 +1,22 @@
+name: Security concern
+description: Report a non-sensitive security concern or ask where to report privately.
+title: "security: "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not post secrets, authorization headers, raw card data, customer data, or exploitable details in a public issue. For sensitive reports, use GitHub private security advisories when available.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the concern without sensitive data.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential impact
+    validations:
+      required: true

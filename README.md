@@ -365,10 +365,11 @@ Use `canTransition` for checks and `assertCanTransition` or
 
 ```bash
 pnpm install
+pnpm format:check
+pnpm lint
 pnpm test
 pnpm typecheck
 pnpm build
-pnpm lint
 ```
 
 ## Documentation
@@ -378,10 +379,14 @@ pnpm lint
 - `docs/state-machine.md`
 - `docs/provider-contract.md`
 - `docs/provider-roadmap.md`
+- `docs/payme-production-guide.md`
 - `docs/payme-production-checklist.md`
+- `docs/payme-troubleshooting.md`
 - `docs/payme-validation-report.md`
 - `docs/production-checklist.md`
 - `docs/reconciliation.md`
+- `docs/release-process.md`
+- `CODE_OF_CONDUCT.md`
 
 ## Contributing
 

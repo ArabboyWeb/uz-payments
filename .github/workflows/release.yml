@@ -1,13 +1,15 @@
-name: CI
+name: Release
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  release:
+    types: [published]
 
 jobs:
-  test:
+  publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -17,6 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: "https://registry.npmjs.org"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -47,3 +50,12 @@ jobs:
           pnpm --filter @uz-payments/payme exec npm pack --dry-run
           pnpm --filter @uz-payments/express exec npm pack --dry-run
           pnpm --filter @uz-payments/next exec npm pack --dry-run
+
+      - name: Publish packages
+        run: |
+          pnpm --filter @uz-payments/core publish --access public --no-git-checks
+          pnpm --filter @uz-payments/payme publish --access public --no-git-checks
+          pnpm --filter @uz-payments/express publish --access public --no-git-checks
+          pnpm --filter @uz-payments/next publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

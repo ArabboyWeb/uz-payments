@@ -15,12 +15,12 @@ packages. Roadmap documentation is acceptable until the provider flow is verifie
 
 ## Planned Providers
 
-| Provider | Status | Notes |
-|---|---|---|
-| Payme | MVP implementation | Merchant API package exists. Production users must verify current official docs. |
-| Click | Planned | Requires verified merchant docs, auth, error mapping, and retry behavior. |
-| Uzum | Planned | Requires verified merchant docs and sandbox strategy. |
-| inPAY | Planned | Requires verified merchant docs and request flow. |
-| Paynet | Planned | Requires verified merchant docs and provider scope. |
-| Apelsin | Planned | Requires verified merchant docs and auth flow. |
-| Bank gateways | Research required | Add only where public or merchant documentation exists. |
+| Provider      | Status             | Notes                                                                            |
+| ------------- | ------------------ | -------------------------------------------------------------------------------- |
+| Payme         | MVP implementation | Merchant API package exists. Production users must verify current official docs. |
+| Click         | Planned            | Requires verified merchant docs, auth, error mapping, and retry behavior.        |
+| Uzum          | Planned            | Requires verified merchant docs and sandbox strategy.                            |
+| inPAY         | Planned            | Requires verified merchant docs and request flow.                                |
+| Paynet        | Planned            | Requires verified merchant docs and provider scope.                              |
+| Apelsin       | Planned            | Requires verified merchant docs and auth flow.                                   |
+| Bank gateways | Research required  | Add only where public or merchant documentation exists.                          |

@@ -19,9 +19,7 @@ describe("payment state transitions", () => {
 
   it("rejects invalid transitions", () => {
     expect(canTransition("PENDING", "CONFIRMED")).toBe(false);
-    expect(() => assertCanTransition("PENDING", "CONFIRMED")).toThrow(
-      InvalidStateTransitionError
-    );
+    expect(() => assertCanTransition("PENDING", "CONFIRMED")).toThrow(InvalidStateTransitionError);
   });
 
   it("returns the new state through the strict helper", () => {

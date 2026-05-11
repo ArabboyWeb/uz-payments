@@ -8,10 +8,11 @@ claims.
 
 ```bash
 pnpm install
+pnpm format:check
+pnpm lint
 pnpm test
 pnpm typecheck
 pnpm build
-pnpm lint
 ```
 
 ## Provider Requirements
@@ -43,3 +44,8 @@ known.
 
 Include a summary, tests run, and any provider documentation used. If a provider
 behavior is uncertain, document the limitation instead of hiding it.
+
+Provider changes must include links or references to official merchant
+documentation and sandbox evidence for request formats, authentication, error
+mapping, and repeated request behavior. Public releases follow
+`docs/release-process.md`.
