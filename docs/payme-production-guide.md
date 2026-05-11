@@ -18,6 +18,33 @@ The important payment table properties are:
 - `raw_payload` stored only when safe for your compliance policy
 - audit events stored without secrets
 
+Minimal SQL queries you should expect to support (PostgreSQL style):
+
+```sql
+-- Find by provider transaction ID (must be indexed/unique).
+SELECT * FROM payment_transactions
+WHERE provider = 'payme' AND provider_transaction_id = $1;
+
+-- CreateTransaction (idempotent insert).
+INSERT INTO payment_transactions (provider, provider_transaction_id, order_id, amount_tiyin, state, raw_payload)
+VALUES ('payme', $provider_tx_id, $order_id, $amount_tiyin, 'CREATED', $raw_payload)
+ON CONFLICT (provider, provider_transaction_id) DO NOTHING;
+
+-- PerformTransaction (idempotent confirm).
+UPDATE payment_transactions
+SET state = 'CONFIRMED',
+    perform_time = COALESCE(perform_time, $now_ms),
+    updated_at = now()
+WHERE provider = 'payme' AND provider_transaction_id = $provider_tx_id;
+
+-- CancelTransaction (idempotent cancel).
+UPDATE payment_transactions
+SET state = 'CANCELLED',
+    cancel_time = COALESCE(cancel_time, $now_ms),
+    updated_at = now()
+WHERE provider = 'payme' AND provider_transaction_id = $provider_tx_id;
+```
+
 ## Server-only Provider Setup
 
 ```ts

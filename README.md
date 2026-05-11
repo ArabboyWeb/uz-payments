@@ -221,7 +221,7 @@ const callbacks: PaymeCallbacks = {
       rawPayload: ctx.rawPayload
     });
 
-    return { create_time: Date.now(), state: 1 };
+    return { create_time: ctx.providerTime, state: 1 };
   },
 
   async performTransaction(ctx) {
@@ -254,6 +254,17 @@ callbacks.
 Verify exact Payme codes, edge cases, repeated request behavior, and sandbox
 behavior against Payme's current official Merchant API documentation before
 production use.
+
+Local live callback runner (requires your deployed HTTPS endpoint and sandbox creds):
+
+```bash
+PAYME_LIVE_URL="https://your-domain.example/payme" \
+PAYME_AUTH_LOGIN="Paycom" \
+PAYME_SECRET_KEY="cashbox_key" \
+PAYME_ORDER_ID="order_100" \
+PAYME_AMOUNT_TIYIN="125000" \
+pnpm payme:live
+```
 
 ## Express
 
@@ -370,7 +381,28 @@ pnpm lint
 pnpm test
 pnpm typecheck
 pnpm build
+pnpm --filter @uz-payments/core exec npm pack --dry-run
+pnpm --filter @uz-payments/payme exec npm pack --dry-run
+pnpm --filter @uz-payments/express exec npm pack --dry-run
+pnpm --filter @uz-payments/next exec npm pack --dry-run
 ```
+
+Fresh install verification checklist (recommended before any public release):
+
+```bash
+mkdir -p /tmp/uz-payments-smoke
+cd /tmp/uz-payments-smoke
+npm init -y
+npm i typescript
+```
+
+Then install the tarballs produced by `npm pack` (or install from npm after publish) and run a
+minimal `tsc` compile that imports:
+
+- `@uz-payments/core`
+- `@uz-payments/payme`
+- `@uz-payments/express`
+- `@uz-payments/next`
 
 ## Documentation
 
@@ -379,6 +411,7 @@ pnpm build
 - `docs/state-machine.md`
 - `docs/provider-contract.md`
 - `docs/provider-roadmap.md`
+- `docs/idempotency.md`
 - `docs/payme-production-guide.md`
 - `docs/payme-production-checklist.md`
 - `docs/payme-troubleshooting.md`

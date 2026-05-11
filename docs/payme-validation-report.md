@@ -38,6 +38,42 @@ Test file:
 
 - `tests/payme/payme-sandbox-harness.test.ts`
 
+## Live Sandbox Runner (Optional)
+
+When you have a deployed HTTPS endpoint registered in Payme Business sandbox,
+you can run a real callback suite from your machine and record sanitized logs:
+
+```bash
+PAYME_LIVE_URL="https://your-domain.example/payme" \
+PAYME_AUTH_LOGIN="Paycom" \
+PAYME_SECRET_KEY="cashbox_key" \
+PAYME_ORDER_ID="order_100" \
+PAYME_AMOUNT_TIYIN="125000" \
+pnpm payme:live
+```
+
+The runner writes JSONL logs to `.payme-live/` and redacts `Authorization`.
+
+## Live Results Table (Fill After Sandbox)
+
+Record sandbox evidence here before claiming production readiness:
+
+| Scenario                     | Expected         | Observed | Request ID | Timestamp | Result  |
+| ---------------------------- | ---------------- | -------- | ---------- | --------- | ------- |
+| CheckPerformTransaction      | allow true       |          |            |           | pending |
+| CreateTransaction            | state 1          |          |            |           | pending |
+| CreateTransaction duplicate  | same as create   |          |            |           | pending |
+| PerformTransaction           | state 2          |          |            |           | pending |
+| PerformTransaction duplicate | same as perform  |          |            |           | pending |
+| CancelTransaction            | state -1 or -2   |          |            |           | pending |
+| CancelTransaction duplicate  | same as cancel   |          |            |           | pending |
+| CheckTransaction             | stable state     |          |            |           | pending |
+| GetStatement                 | includes tx      |          |            |           | pending |
+| Invalid auth                 | -32504           |          |            |           | pending |
+| Invalid amount               | -31001 or -32600 |          |            |           | pending |
+| Order not found              | -31050           |          |            |           | pending |
+| Unknown transaction          | -31003           |          |            |           | pending |
+
 The harness creates an in-memory merchant billing model with:
 
 - orders stored server-side

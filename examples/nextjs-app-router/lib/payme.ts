@@ -29,7 +29,8 @@ export const callbacks: PaymeCallbacks = {
       orderId: String(ctx.account.order_id ?? ""),
       amountTiyin: ctx.amount,
       state: "CREATED",
-      createTime: Date.now(),
+      // Store the provider-issued creation time so reconciliation via GetStatement is consistent.
+      createTime: ctx.providerTime,
       rawPayload: ctx.rawPayload as unknown as Record<string, unknown>
     });
 

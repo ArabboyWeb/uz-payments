@@ -15,6 +15,12 @@ Check:
 
 Do not log the full header value.
 
+Safe debugging:
+
+- log only `Authorization: [REDACTED]`
+- record sanitized request/response samples for auditing
+- do not include secrets in bug reports
+
 ## `-31001` Invalid Amount
 
 Meaning: Payme amount does not match your server-side order amount.
@@ -62,9 +68,26 @@ Check:
 - framework adapter is reading the request body once
 - Payme endpoint is not being hit by unrelated clients
 
+Express note: if you use `express.json()`, invalid JSON can be rejected before
+your handler runs. If you need full control over the Payme error body, do not
+rely on framework default errors.
+
 ## Safe Debugging
 
 - Redact `Authorization` headers.
 - Do not log provider secrets.
 - Do not store raw card data.
 - Keep request/response samples sanitized before sharing them in issues.
+
+## Common Merchant Mistakes
+
+- amount is stored in UZS decimals instead of integer tiyin
+- `CreateTransaction` is not idempotent and inserts duplicates
+- `PerformTransaction` marks business state paid before the DB transaction commits
+- cancellation/refund policy is implemented without confirming Payme rules in sandbox
+
+## Proxy Pitfalls
+
+- `Authorization` header stripped by nginx/CDN defaults
+- request body read twice (one middleware consumes it, handler sees empty body)
+- non-HTTPS callback URL registered in sandbox/production

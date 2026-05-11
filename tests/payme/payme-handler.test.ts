@@ -165,6 +165,35 @@ describe("PaymeProvider", () => {
     expect("error" in response && response.error.code).toBe(-31001);
   });
 
+  it("maps CreateTransaction order-not-found failure", async () => {
+    callbacks.createTransaction = vi.fn(async () => {
+      throw new PaymeMerchantError("ORDER_NOT_FOUND", "order_id");
+    });
+
+    const response = await provider.handleRequest(
+      createTransactionPayload("tx_missing_order"),
+      authHeaders(),
+      callbacks
+    );
+
+    expect("error" in response && response.error.code).toBe(-31050);
+    expect("error" in response && response.error.data).toBe("order_id");
+  });
+
+  it("maps CreateTransaction invalid amount failure", async () => {
+    callbacks.createTransaction = vi.fn(async () => {
+      throw new PaymeMerchantError("INVALID_AMOUNT");
+    });
+
+    const response = await provider.handleRequest(
+      createTransactionPayload("tx_invalid_amount"),
+      authHeaders(),
+      callbacks
+    );
+
+    expect("error" in response && response.error.code).toBe(-31001);
+  });
+
   it("handles CreateTransaction flow", async () => {
     const response = await provider.handleRequest(
       createTransactionPayload(),
@@ -294,6 +323,20 @@ describe("PaymeProvider", () => {
     });
   });
 
+  it("maps cancelled transaction errors to Payme -31008 for CancelTransaction", async () => {
+    callbacks.cancelTransaction = vi.fn(async () => {
+      throw new PaymeMerchantError("TRANSACTION_CANCELLED");
+    });
+
+    const response = await provider.handleRequest(
+      { id: 4, method: "CancelTransaction", params: { id: "cancelled", reason: 2 } },
+      authHeaders(),
+      callbacks
+    );
+
+    expect("error" in response && response.error.code).toBe(-31008);
+  });
+
   it("handles repeated CancelTransaction requests idempotently when callbacks return the stored cancel_time", async () => {
     const cancelled = new Map<string, number>();
     callbacks.cancelTransaction = vi.fn(async (ctx) => {
@@ -322,6 +365,20 @@ describe("PaymeProvider", () => {
     );
 
     expect("error" in response && response.error.code).toBe(-31007);
+  });
+
+  it("maps unknown transaction errors for CheckTransaction", async () => {
+    callbacks.checkTransaction = vi.fn(async () => {
+      throw new PaymeMerchantError("TRANSACTION_NOT_FOUND");
+    });
+
+    const response = await provider.handleRequest(
+      { id: 5, method: "CheckTransaction", params: { id: "missing" } },
+      authHeaders(),
+      callbacks
+    );
+
+    expect("error" in response && response.error.code).toBe(-31003);
   });
 
   it("handles CheckTransaction flow with Payme-required zero/null fallback fields", async () => {

@@ -35,7 +35,8 @@ const callbacks: PaymeCallbacks = {
 
   async createTransaction(ctx) {
     const orderId = String(ctx.account.order_id ?? "");
-    const createTime = Date.now();
+    // Store the provider-issued creation time so reconciliation via GetStatement is consistent.
+    const createTime = ctx.providerTime;
 
     const transaction = await db.transactions.create({
       provider: "payme",

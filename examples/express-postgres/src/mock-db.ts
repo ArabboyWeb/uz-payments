@@ -36,8 +36,16 @@ const auditEvents: PaymentAuditEvent[] = [];
 
 export const db = {
   async withPaymentTransaction<T>(fn: () => Promise<T>): Promise<T> {
-    // Production code should use a real database transaction here.
-    return fn();
+    // Production code must use a real DB transaction here.
+    console.log("BEGIN");
+    try {
+      const result = await fn();
+      console.log("COMMIT");
+      return result;
+    } catch (error) {
+      console.log("ROLLBACK");
+      throw error;
+    }
   },
   orders: {
     async findById(id: string): Promise<Order | null> {
