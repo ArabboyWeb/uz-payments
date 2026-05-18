@@ -210,7 +210,11 @@ describe("PaymeProvider", () => {
       result: { create_time: expect.any(Number), transaction: "tx_1", state: 1 }
     });
     expect(callbacks.createTransaction).toHaveBeenCalledWith(
-      expect.objectContaining({ transactionId: "tx_1", amount: 5000, providerTime: expect.any(Number) })
+      expect.objectContaining({
+        transactionId: "tx_1",
+        amount: 5000,
+        providerTime: expect.any(Number)
+      })
     );
   });
 
@@ -558,4 +562,3 @@ describe("PaymeProvider", () => {
     );
   });
 });
-

@@ -78,10 +78,7 @@ function extractRequestMethod(payload: unknown): string | undefined {
  * configured transaction timeout. If transactionTimeoutMs is 0 the check
  * is disabled entirely.
  */
-function assertTransactionNotExpired(
-  providerTime: number,
-  options: PaymeProviderOptions
-): void {
+function assertTransactionNotExpired(providerTime: number, options: PaymeProviderOptions): void {
   const timeoutMs = options.transactionTimeoutMs ?? PAYME_DEFAULT_TRANSACTION_TIMEOUT_MS;
 
   if (timeoutMs === 0) {

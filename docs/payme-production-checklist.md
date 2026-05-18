@@ -30,9 +30,34 @@ Official documentation reviewed while hardening this SDK:
 ## Amounts
 
 - Payme amounts are positive integer tiyin values.
-- Store local order amounts in tiyin.
-- Load the order server-side in `CheckPerformTransaction` and `CreateTransaction`.
-- Return `-31001` when the Payme amount does not match the local order amount.
+- [ ] Validate order availability (e.g., `status = "pending"`, items in stock).
+- [ ] Enforce idempotency: repeated CreateTransaction with the same transaction ID must return the same stored transaction.
+- [ ] Refuse the transaction if the application `order.amount` does not perfectly match `amount` (returning `-31001` / `INVALID_AMOUNT`). 
+
+## PerformTransaction Validation
+
+- [ ] Ensure idempotency: repeated PerformTransaction with the same transaction ID must return success safely.
+- [ ] Persist the `transactionState` to Payme state `2` safely before order fulfillment or before marking it paid.
+- [ ] Ensure you record a durable timestamp of the perform time.
+
+## CancelTransaction Validation
+
+- [ ] If cancelled before PerformTransaction, map the transaction back to Payme state `-1`.
+- [ ] If cancelled after PerformTransaction, map the transaction state to `-2`.
+- [ ] Retain the `reason` field securely when Payme provides it on cancellation.
+
+## Statement & Reconciliation Validation
+
+- [ ] Ensure `GetStatement` retrieves items sorted natively via database by ascending creation time.
+
+## Operational Readiness
+
+- [ ] **No Raw Card Data:** Ensure no frontend form captures raw user card details. SDK callbacks are for server-side endpoints only.
+- [ ] **Monitoring:** Implement standard application metrics monitoring for unexpected exceptions in your payload parsers.
+- [ ] **Alerting:** Set up actionable alerts if the integration repeatedly throws unhandled `SystemErrors`.
+- [ ] **Backups:** Implement point-in-time recovery for the SQL tables handling your payment and order lifecycles.
+- [ ] **Manual Reconciliation:** Configure access for operations staff to verify database orders against your Payme dashboard.
+- [ ] **Rollback Procedure:** Ensure you have a clear runbook to deactivate the webhook endpoints safely in a production incident.
 - Never trust frontend amount values.
 
 ## Transactions

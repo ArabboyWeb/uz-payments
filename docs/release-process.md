@@ -1,41 +1,53 @@
 # Release Process
 
-This project publishes separate npm packages from the monorepo:
+This document describes the steps to release new versions of the `@uz-payments` packages.
 
-- `@uz-payments/core`
-- `@uz-payments/payme`
-- `@uz-payments/express`
-- `@uz-payments/next`
+## 1. Local Validation
 
-## Pre-release Requirements
-
-- Payme behavior is verified against official documentation.
-- Real Payme Business sandbox validation is recorded when provider behavior
-  changes.
-- No unsupported provider source packages are added.
-- No raw card data handling is introduced.
-- Package versions are intentionally chosen.
-
-## Local Checks
+Before initiating any release, ensure the repository meets the organization-ready standard:
 
 ```bash
-pnpm install
+# 1. Ensure clean slate
+pnpm install --frozen-lockfile
+
+# 2. Check standards
 pnpm format:check
 pnpm lint
+
+# 3. Verify types and tests
 pnpm typecheck
 pnpm test
+
+# 4. Build projects
 pnpm build
-pnpm --filter @uz-payments/core exec npm pack --dry-run
-pnpm --filter @uz-payments/payme exec npm pack --dry-run
-pnpm --filter @uz-payments/express exec npm pack --dry-run
-pnpm --filter @uz-payments/next exec npm pack --dry-run
+
+# 5. Pack dry-run & smoke test
+pnpm smoke:pack
 ```
 
-## Publishing
+## 2. Sandbox Validation 
 
-1. Confirm `NPM_TOKEN` is configured in GitHub repository secrets.
-2. Create a GitHub release for the intended version.
-3. The release workflow runs checks and publishes packages to npm.
-4. Confirm package pages and install commands work from a fresh project.
+Do NOT publish if a new architecture/flow feature was added without running it through real Payme Sandbox tests. 
+- Ensure `docs/final-validation-report.md` reflects live sandbox testing states depending on the nature of the change.
 
-Do not publish if real sandbox validation is required but missing.
+## 3. Version Bumping
+
+Use standard semantic-versioning for the workspace.
+
+## 4. Updates to CHANGELOG
+
+Update `CHANGELOG.md` highlighting what changes occurred, breaking changes, and relevant architectural decisions.
+
+## 5. Publishing
+
+After local tests pass and CI passes (`.github/workflows/ci.yml`), you can publish to NPM:
+
+```bash
+pnpm -r publish --access public
+```
+
+*Note: Since the packages are intertwined, it is highly recommended to use a unified version matching system (e.g. all 0.1.0).*
+
+> **Publish Rules:** 
+> - A release MUST NOT contain mock implementations or non-functional gateway stub code packaged dynamically. 
+> - Documentation MUST not claim full enterprise-readiness without explicit warnings regarding application-side requirements (idempotency, amounts validation, durable persistence).

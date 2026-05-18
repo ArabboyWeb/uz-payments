@@ -1,0 +1,40 @@
+﻿Starting smoke pack install test...
+Packing @uz-payments/core...
+Created: C:\Users\user\Desktop\uz-payments\packages\core\uz-payments-core-0.1.0.tgz
+Packing @uz-payments/payme...
+Created: C:\Users\user\Desktop\uz-payments\packages\payme\uz-payments-payme-0.1.0.tgz
+Packing @uz-payments/express...
+Created: C:\Users\user\Desktop\uz-payments\packages\express\uz-payments-express-0.1.0.tgz
+Packing @uz-payments/next...
+Created: C:\Users\user\Desktop\uz-payments\packages\next\uz-payments-next-0.1.0.tgz
+Created temp project at C:\Users\user\AppData\Local\Temp\uz-payments-smoke-8oWdns
+Installing typescript and types dependencies...
+
+added 12 packages, and audited 13 packages in 1s
+
+found 0 vulnerabilities
+Installing packed tarballs...
+
+added 71 packages, and audited 84 packages in 2s
+
+25 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+added 22 packages, changed 1 package, and audited 106 packages in 27s
+
+31 packages are looking for funding
+  run `npm fund` for details
+
+2 moderate severity vulnerabilities
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+Writing smoke test file...
+Compiling smoke test file...
+Running smoke test file...
+Need to install the following packages:
+tsx@4.22.1

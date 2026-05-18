@@ -1,4 +1,6 @@
-# Express + PostgreSQL Example
+# Payme Express Example
+
+> **Disclaimer:** This example is named `express-postgres` to demonstrate the architecture of a PostgreSQL-backed integration, but it internally uses a simplified mock in-memory array (`mock-db.ts`) for portability. It is **NOT** a real database implementation and should not be deployed to production as-is. Always use a durable database system in your production implementation.
 
 This example shows how to wire `@uz-payments/payme` into an Express server.
 

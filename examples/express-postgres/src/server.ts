@@ -23,10 +23,7 @@ const payme = new PaymeProvider({
  * -1  = cancelled from created state
  * -2  = cancelled after confirmed (refunded through Payme)
  */
-function toPaymeState(
-  localState: string,
-  previousState?: string
-): PaymeTransactionState {
+function toPaymeState(localState: string, previousState?: string): PaymeTransactionState {
   switch (localState) {
     case "CONFIRMED":
       return 2;
@@ -150,10 +147,7 @@ const callbacks: PaymeCallbacks = {
         perform_time: transaction.performTime,
         cancel_time: transaction.cancelTime,
         transaction: transaction.providerTransactionId,
-        state: toPaymeState(
-          transaction.state,
-          transaction.performTime ? "CONFIRMED" : "CREATED"
-        ),
+        state: toPaymeState(transaction.state, transaction.performTime ? "CONFIRMED" : "CREATED"),
         reason: transaction.reason
       }))
     };

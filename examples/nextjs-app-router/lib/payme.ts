@@ -17,10 +17,7 @@ export const payme = new PaymeProvider({
  * -1  = cancelled from created state
  * -2  = cancelled after confirmed (refunded through Payme)
  */
-function toPaymeState(
-  localState: string,
-  wasPerformed: boolean
-): PaymeTransactionState {
+function toPaymeState(localState: string, wasPerformed: boolean): PaymeTransactionState {
   switch (localState) {
     case "CONFIRMED":
       return 2;

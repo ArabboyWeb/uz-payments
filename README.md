@@ -13,8 +13,11 @@ TypeScript-first payment infrastructure SDK for Uzbekistan-focused applications.
 amount handling, typed provider callbacks, request validation, state modeling,
 framework adapters, and production-oriented documentation.
 
+> **Status:** Organization-ready SDK release candidate for Payme integrations, subject to merchant-side sandbox validation and production checklist completion.  
+> This is a server-side framework implementation—it is not a payment processor and does not hold or store raw card data.
+
 This project is not affiliated with Payme, Click, Uzum, inPAY, Paynet, Apelsin,
-any bank, or any other payment provider. Always verify integrations against the
+any bank, or any provider. Current active gateway implementation is Payme. Planned providers remain roadmap-only. Always verify integrations against the
 provider's official documentation and sandbox before production use.
 
 This SDK is a developer integration toolkit. It is not a payment processor, bank,

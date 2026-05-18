@@ -65,7 +65,12 @@ describe("Payme JSON-RPC helpers", () => {
     ];
 
     for (const payload of cases) {
-      const response = await safeHandlePaymeRpcRequest(payload, callbacks as any, options, authenticate);
+      const response = await safeHandlePaymeRpcRequest(
+        payload,
+        callbacks as any,
+        options,
+        authenticate
+      );
       expect("error" in response).toBe(true);
       expect("error" in response && typeof response.error.code).toBe("number");
       expect("error" in response && [-32600, -32601, -32400].includes(response.error.code)).toBe(
