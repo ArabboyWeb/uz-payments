@@ -1,0 +1,195 @@
+﻿
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mC:/Users/user/Desktop/uz-payments[39m
+
+ [32mтЬУ[39m tests/core/state.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32mтЬУ[39m tests/core/errors.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32mтЬУ[39m tests/core/audit.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32mтЬУ[39m tests/core/money.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 177[2mms[22m[39m
+ [32mтЬУ[39m tests/payme/payme-auth.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32mтЬУ[39m tests/payme/payme-rpc.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32mтЬУ[39m tests/payme/payme-sandbox-harness.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 34[2mms[22m[39m
+ [32mтЬУ[39m tests/payme/payme-adapters.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [31mтЭп[39m tests/payme/payme-handler.test.ts [2m([22m[2m30 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[90m 87[2mms[22m[39m
+[31m   [31m├Ч[31m PaymeProvider[2m > [22mhandles CreateTransaction flow[90m 27[2mms[22m[31m[39m
+[31m     тЖТ expected "spy" to be called with arguments: [ ObjectContaining{тАж} ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  Array [[22m
+[32m-   ObjectContaining {[90m
+[31m+   Object {[90m
+[31m+     "account": Object {[90m
+[31m+       "order_id": "order_1",[90m
+[31m+     },[90m
+[31m+     "amount": 5000,[90m
+[31m+     "providerTime": 1779068518181,[90m
+[31m+     "rawPayload": Object {[90m
+[31m+       "id": 2,[90m
+[31m+       "method": "CreateTransaction",[90m
+[31m+       "params": Object {[90m
+[31m+         "account": Object {[90m
+[31m+           "order_id": "order_1",[90m
+[31m+         },[90m
+[2m          "amount": 5000,[22m
+[32m-     "providerTime": 1399114284039,[90m
+[31m+         "id": "tx_1",[90m
+[31m+         "time": 1779068518181,[90m
+[31m+       },[90m
+[31m+     },[90m
+[2m      "transactionId": "tx_1",[22m
+[2m    },[22m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+
+node.exe : [31mтОптОпт
+ОптОптОптОптОп[1m[7m 
+Failed Tests 1 [27m[2
+2mтОптОптОптОптОптОптОп
+[39m
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : 
+NotSpecified    : 
+([31mтОптОптОпт.    
+..птОптОптОп[39m:S    
+tring) [], RemoteEx    
+ception
+    + 
+FullyQualifiedErr    
+orId : NativeComman    
+dError
+ 
+
+[31m[1m[7m FAIL 
+[27m[22m[39m tests/p
+ayme/payme-handler.test
+.ts[2m > 
+[22mPaymeProvider[2m 
+> [22mhandles 
+CreateTransaction flow
+[31m[1mAssertionError
+[22m: expected "spy" 
+to be called with 
+arguments: [ 
+ObjectContaining{тАж} 
+][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  Array [[22m
+[32m-   
+ObjectContaining {[90m
+[31m+   Object {[90m
+[31m+     "account": 
+Object {[90m
+[31m+       
+"order_id": 
+"order_1",[90m
+[31m+     },[90m
+[31m+     "amount": 
+5000,[90m
+[31m+     
+"providerTime": 
+1779068518181,[90m
+[31m+     
+"rawPayload": Object 
+{[90m
+[31m+       "id": 
+2,[90m
+[31m+       "method": 
+"CreateTransaction",[9
+0m
+[31m+       "params": 
+Object {[90m
+[31m+         
+"account": Object 
+{[90m
+[31m+           
+"order_id": 
+"order_1",[90m
+[31m+         },[90m
+[2m          
+"amount": 5000,[22m
+[32m-     
+"providerTime": 
+1399114284039,[90m
+[31m+         "id": 
+"tx_1",[90m
+[31m+         "time": 
+1779068518181,[90m
+[31m+       },[90m
+[31m+     },[90m
+[2m      
+"transactionId": 
+"tx_1",[22m
+[2m    },[22m
+[2m  ][22m
+[31m[90m
+
+Number of calls: 
+[1m1[22m
+[31m[39m
+[36m [2mтЭп[22m test
+s/payme/payme-handler.t
+est.ts:[2m212:41[22m
+[39m
+    [90m210| [39m    
+  result[33m:[39m { 
+create_time[33m:[39m 
+[33mPAYME_TIME[39m[3
+3m,[39m 
+transaction[33m:[39m 
+[32m"tx_1"[39m[33m,
+[39m state[33m:[39m 
+[34m1[39mтАж
+    [90m211| [39m    
+})[33m;[39m
+    [90m212| [39m    
+[34mexpect[39m(callba
+cks[33m.[39mcreateTra
+nsaction)[33m.[39m[3
+4mtoHaveBeenCalledWith
+[39m(
+    [90m   | [39m    
+                       
+             
+[31m^[39m
+    [90m213| [39m    
+  expect[33m.[39m[34
+mobjectContaining[39m(
+{ transactionId[33m:[
+39m [32m"tx_1"[39m[3
+3m,[39m 
+amount[33m:[39m [34m
+5000[39m[33m,[39m 
+pтАж
+    [90m214| [39m    
+)[33m;[39m
+
+[31m[2mтОптОптОптОптО
+птОптОптОптОптОптОптОпт
+ОптОптОптОптОптОптОптОп
+тОптОптОптОп[1/1]тОп[2
+2m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (9)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m59 passed[39m[22m[90m (60)[39m
+[2m   Start at [22m 06:41:57
+[2m   Duration [22m 1.58s[2m (transform 733ms, setup 0ms, collect 3.71s, tests 410ms, environment 3ms, prepare 3.16s)[22m
+

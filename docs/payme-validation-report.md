@@ -175,15 +175,15 @@ updated with real Payme sandbox timestamps, request IDs, and observed responses.
 
 ## Fixes Applied
 
-No architecture changes were made.
-
-Added:
-
+- added 12-hour provider timestamp timeout validation in SDK `CreateTransaction` handler
+- added strict `-2` (cancelled after confirmed) state mapping to both Next.js and Express examples
+- made SDK audit array redaction recursively safe
+- added `reason` field parsing and mapping for refunds
 - sandbox-style validation harness
 - sanitized raw request/response capture inside the harness
 - validation report documentation
 
-No provider packages were added.
+No new provider packages were added.
 
 ## Remaining Production Risks
 

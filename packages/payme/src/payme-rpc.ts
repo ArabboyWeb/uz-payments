@@ -53,7 +53,7 @@ export const transactionIdParamsSchema = z.object({
 });
 
 export const cancelTransactionParamsSchema = transactionIdParamsSchema.extend({
-  reason: z.number().int()
+  reason: z.number().int().optional()
 });
 
 export const statementParamsSchema = z.object({

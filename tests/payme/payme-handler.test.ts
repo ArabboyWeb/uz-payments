@@ -3,6 +3,11 @@ import { PaymeCallbacks, PaymeMerchantError, PaymeProvider } from "@uz-payments/
 
 const PAYME_TIME = 1_399_114_284_039;
 
+/** Fresh timestamp within the 12h timeout window for CreateTransaction tests. */
+function freshTime(): number {
+  return Date.now() - 1000;
+}
+
 function authHeaders(secret = "secret", username = "Paycom"): Record<string, string> {
   return {
     authorization: `Basic ${Buffer.from(`${username}:${secret}`).toString("base64")}`
@@ -30,7 +35,7 @@ function createTransactionPayload(id = "tx_1") {
     method: "CreateTransaction",
     params: {
       id,
-      time: PAYME_TIME,
+      time: freshTime(),
       amount: 5000,
       account: { order_id: "order_1" }
     }
@@ -202,10 +207,10 @@ describe("PaymeProvider", () => {
     );
 
     expect(response).toMatchObject({
-      result: { create_time: PAYME_TIME, transaction: "tx_1", state: 1 }
+      result: { create_time: expect.any(Number), transaction: "tx_1", state: 1 }
     });
     expect(callbacks.createTransaction).toHaveBeenCalledWith(
-      expect.objectContaining({ transactionId: "tx_1", amount: 5000, providerTime: PAYME_TIME })
+      expect.objectContaining({ transactionId: "tx_1", amount: 5000, providerTime: expect.any(Number) })
     );
   });
 
@@ -437,4 +442,120 @@ describe("PaymeProvider", () => {
     expect("error" in response && response.error.message.en).toBe("System error");
     expect(JSON.stringify(response)).not.toContain("database secret details");
   });
+
+  it("rejects CreateTransaction when provider timestamp exceeds the 12-hour timeout", async () => {
+    const expiredTime = Date.now() - 43_200_000 - 1000; // 12h + 1s ago
+    const response = await provider.handleRequest(
+      {
+        id: 7,
+        method: "CreateTransaction",
+        params: {
+          id: "tx_expired",
+          time: expiredTime,
+          amount: 5000,
+          account: { order_id: "order_1" }
+        }
+      },
+      authHeaders(),
+      callbacks
+    );
+
+    expect("error" in response && response.error.code).toBe(-31008);
+    expect(callbacks.createTransaction).not.toHaveBeenCalled();
+  });
+
+  it("accepts CreateTransaction when provider timestamp is within the 12-hour timeout", async () => {
+    const freshTime = Date.now() - 1000; // 1 second ago
+    const response = await provider.handleRequest(
+      {
+        id: 8,
+        method: "CreateTransaction",
+        params: {
+          id: "tx_fresh",
+          time: freshTime,
+          amount: 5000,
+          account: { order_id: "order_1" }
+        }
+      },
+      authHeaders(),
+      callbacks
+    );
+
+    expect(response).toMatchObject({
+      result: { transaction: "tx_fresh", state: 1 }
+    });
+    expect(callbacks.createTransaction).toHaveBeenCalled();
+  });
+
+  it("respects custom transactionTimeoutMs configuration", async () => {
+    const customProvider = new PaymeProvider({
+      merchantId: "merchant",
+      secretKey: "secret",
+      transactionTimeoutMs: 5000 // 5 seconds
+    });
+
+    const oldTime = Date.now() - 10_000; // 10 seconds ago — exceeds 5s timeout
+    const response = await customProvider.handleRequest(
+      {
+        id: 9,
+        method: "CreateTransaction",
+        params: {
+          id: "tx_custom_timeout",
+          time: oldTime,
+          amount: 5000,
+          account: { order_id: "order_1" }
+        }
+      },
+      authHeaders(),
+      callbacks
+    );
+
+    expect("error" in response && response.error.code).toBe(-31008);
+  });
+
+  it("skips timeout check when transactionTimeoutMs is set to 0", async () => {
+    const noTimeoutProvider = new PaymeProvider({
+      merchantId: "merchant",
+      secretKey: "secret",
+      transactionTimeoutMs: 0
+    });
+
+    const veryOldTime = Date.now() - 999_999_999; // very old
+    const response = await noTimeoutProvider.handleRequest(
+      {
+        id: 10,
+        method: "CreateTransaction",
+        params: {
+          id: "tx_no_timeout",
+          time: veryOldTime,
+          amount: 5000,
+          account: { order_id: "order_1" }
+        }
+      },
+      authHeaders(),
+      callbacks
+    );
+
+    expect(response).toMatchObject({ result: expect.objectContaining({ state: 1 }) });
+  });
+
+  it("handles CancelTransaction without a reason field", async () => {
+    const response = await provider.handleRequest(
+      {
+        id: 11,
+        method: "CancelTransaction",
+        params: { id: "tx_1" }
+      },
+      authHeaders(),
+      callbacks
+    );
+
+    expect(response).toMatchObject({
+      result: { transaction: "tx_1", state: -1 }
+    });
+    expect(callbacks.cancelTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ transactionId: "tx_1" })
+    );
+  });
 });
+

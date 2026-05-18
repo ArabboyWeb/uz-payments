@@ -15,6 +15,7 @@ export interface PaymentTransaction {
   createTime: number;
   performTime?: number;
   cancelTime?: number;
+  reason?: number;
   rawPayload: Record<string, unknown>;
 }
 
@@ -92,17 +93,26 @@ export const db = {
         transaction.performTime = transaction.performTime ?? performTime;
       }
     },
-    async cancel(providerTransactionId: string, cancelTime: number): Promise<void> {
+    async cancel(
+      providerTransactionId: string,
+      cancelTime: number,
+      reason?: number
+    ): Promise<void> {
       const transaction = transactions.get(providerTransactionId);
       if (transaction) {
         transaction.state = "CANCELLED";
         transaction.cancelTime = transaction.cancelTime ?? cancelTime;
+        if (reason !== undefined) {
+          transaction.reason = transaction.reason ?? reason;
+        }
       }
     },
     async statement(from: number, to: number): Promise<PaymentTransaction[]> {
-      return [...transactions.values()].filter((transaction) => {
-        return transaction.createTime >= from && transaction.createTime <= to;
-      });
+      return [...transactions.values()]
+        .filter((transaction) => {
+          return transaction.createTime >= from && transaction.createTime <= to;
+        })
+        .sort((a, b) => a.createTime - b.createTime);
     }
   },
   audit: {

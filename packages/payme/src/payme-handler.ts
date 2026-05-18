@@ -19,7 +19,13 @@ import {
   successResponse,
   transactionIdParamsSchema
 } from "./payme-rpc";
-import type { PaymeJsonRpcId, PaymeJsonRpcRequest, PaymeJsonRpcResponse } from "./payme-types";
+import type {
+  PaymeJsonRpcId,
+  PaymeJsonRpcRequest,
+  PaymeJsonRpcResponse,
+  PaymeProviderOptions
+} from "./payme-types";
+import { PAYME_DEFAULT_TRANSACTION_TIMEOUT_MS } from "./payme-types";
 
 function extractRequestId(payload: unknown): PaymeJsonRpcId | undefined {
   if (typeof payload !== "object" || payload === null || !("id" in payload)) {
@@ -67,9 +73,31 @@ function extractRequestMethod(payload: unknown): string | undefined {
   return typeof method === "string" ? method : undefined;
 }
 
+/**
+ * Check whether the Payme-issued provider timestamp is older than the
+ * configured transaction timeout. If transactionTimeoutMs is 0 the check
+ * is disabled entirely.
+ */
+function assertTransactionNotExpired(
+  providerTime: number,
+  options: PaymeProviderOptions
+): void {
+  const timeoutMs = options.transactionTimeoutMs ?? PAYME_DEFAULT_TRANSACTION_TIMEOUT_MS;
+
+  if (timeoutMs === 0) {
+    return;
+  }
+
+  const age = Date.now() - providerTime;
+  if (age > timeoutMs) {
+    throw new PaymeMerchantError("CANNOT_PERFORM");
+  }
+}
+
 export async function handlePaymeRpcRequest(
   request: PaymeJsonRpcRequest,
-  callbacks: PaymeCallbacks
+  callbacks: PaymeCallbacks,
+  options: PaymeProviderOptions
 ): Promise<PaymeJsonRpcResponse> {
   switch (request.method) {
     case "CheckPerformTransaction": {
@@ -92,6 +120,7 @@ export async function handlePaymeRpcRequest(
     case "CreateTransaction": {
       const params = assertValidParams(createTransactionParamsSchema.safeParse(request.params));
       assertValidTiyinAmount(params.amount);
+      assertTransactionNotExpired(params.time, options);
 
       const result = await callbacks.createTransaction({
         transactionId: params.id,
@@ -174,6 +203,7 @@ export async function handlePaymeRpcRequest(
 export async function safeHandlePaymeRpcRequest(
   payload: unknown,
   callbacks: PaymeCallbacks,
+  options: PaymeProviderOptions,
   authenticate: () => void
 ): Promise<PaymeJsonRpcResponse> {
   const id = extractRequestId(payload);
@@ -182,7 +212,7 @@ export async function safeHandlePaymeRpcRequest(
   try {
     authenticate();
     const request = parsePaymeRequest(payload);
-    return await handlePaymeRpcRequest(request, callbacks);
+    return await handlePaymeRpcRequest(request, callbacks, options);
   } catch (error) {
     if (error instanceof ProviderMethodNotSupportedError) {
       return methodNotFoundResponse(id, method);

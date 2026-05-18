@@ -9,7 +9,8 @@ export class PaymeProvider implements PaymentProvider {
   readonly name = "payme";
   readonly merchantId: string;
 
-  private readonly options: PaymeProviderOptions;
+  /** @internal */
+  readonly options: PaymeProviderOptions;
 
   constructor(options: PaymeProviderOptions) {
     validatePaymeConfig(options);
@@ -22,7 +23,7 @@ export class PaymeProvider implements PaymentProvider {
     headers: Record<string, string | string[] | undefined>,
     callbacks: PaymeCallbacks
   ): Promise<PaymeJsonRpcResponse> {
-    return safeHandlePaymeRpcRequest(payload, callbacks, () => {
+    return safeHandlePaymeRpcRequest(payload, callbacks, this.options, () => {
       assertPaymeBasicAuth(headers, this.options);
     });
   }

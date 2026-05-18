@@ -1,4 +1,5 @@
 import { PaymeMerchantError, PaymeProvider, type PaymeCallbacks } from "@uz-payments/payme";
+import type { PaymeTransactionState } from "@uz-payments/payme";
 
 import { db } from "./mock-db";
 
@@ -6,6 +7,29 @@ export const payme = new PaymeProvider({
   merchantId: process.env.PAYME_MERCHANT_ID ?? "",
   secretKey: process.env.PAYME_SECRET_KEY ?? ""
 });
+
+/**
+ * Map local payment state to Payme transaction state integer.
+ *
+ * Payme states:
+ *  1  = created
+ *  2  = confirmed (performed)
+ * -1  = cancelled from created state
+ * -2  = cancelled after confirmed (refunded through Payme)
+ */
+function toPaymeState(
+  localState: string,
+  wasPerformed: boolean
+): PaymeTransactionState {
+  switch (localState) {
+    case "CONFIRMED":
+      return 2;
+    case "CANCELLED":
+      return wasPerformed ? -2 : -1;
+    default:
+      return 1;
+  }
+}
 
 export const callbacks: PaymeCallbacks = {
   async checkPerformTransaction(ctx) {
@@ -72,12 +96,14 @@ export const callbacks: PaymeCallbacks = {
       throw new PaymeMerchantError("TRANSACTION_NOT_FOUND");
     }
 
+    const wasPerformed = existing.performTime !== undefined;
     const transaction = await db.withPaymentTransaction(async () => {
       const updated = await db.setTransactionState(
         ctx.transactionId,
         "CANCELLED",
         "cancelTime",
-        now
+        now,
+        ctx.reason
       );
       if (updated) {
         await db.recordAudit({
@@ -92,7 +118,7 @@ export const callbacks: PaymeCallbacks = {
 
     return {
       cancel_time: transaction?.cancelTime ?? now,
-      state: existing.state === "CONFIRMED" ? -2 : -1
+      state: toPaymeState("CANCELLED", wasPerformed)
     };
   },
 
@@ -106,7 +132,8 @@ export const callbacks: PaymeCallbacks = {
       create_time: transaction.createTime,
       perform_time: transaction.performTime,
       cancel_time: transaction.cancelTime,
-      state: transaction.state === "CONFIRMED" ? 2 : transaction.state === "CANCELLED" ? -1 : 1
+      state: toPaymeState(transaction.state, transaction.performTime !== undefined),
+      reason: transaction.reason
     };
   },
 
@@ -123,7 +150,8 @@ export const callbacks: PaymeCallbacks = {
         perform_time: transaction.performTime,
         cancel_time: transaction.cancelTime,
         transaction: transaction.id,
-        state: transaction.state === "CONFIRMED" ? 2 : transaction.state === "CANCELLED" ? -1 : 1
+        state: toPaymeState(transaction.state, transaction.performTime !== undefined),
+        reason: transaction.reason
       }))
     };
   }

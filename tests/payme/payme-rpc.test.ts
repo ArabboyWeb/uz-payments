@@ -51,6 +51,7 @@ describe("Payme JSON-RPC helpers", () => {
     };
 
     const authenticate = () => {};
+    const options = { merchantId: "m", secretKey: "s", transactionTimeoutMs: 0 };
     const cases: unknown[] = [
       null,
       123,
@@ -64,7 +65,7 @@ describe("Payme JSON-RPC helpers", () => {
     ];
 
     for (const payload of cases) {
-      const response = await safeHandlePaymeRpcRequest(payload, callbacks as any, authenticate);
+      const response = await safeHandlePaymeRpcRequest(payload, callbacks as any, options, authenticate);
       expect("error" in response).toBe(true);
       expect("error" in response && typeof response.error.code).toBe("number");
       expect("error" in response && [-32600, -32601, -32400].includes(response.error.code)).toBe(
@@ -86,6 +87,7 @@ describe("Payme JSON-RPC helpers", () => {
     const response = await safeHandlePaymeRpcRequest(
       { id: 1, method: "Unknown", params: {} },
       callbacks as any,
+      { merchantId: "m", secretKey: "s", transactionTimeoutMs: 0 },
       () => {}
     );
 

@@ -14,6 +14,7 @@ interface Transaction {
   createTime: number;
   performTime?: number;
   cancelTime?: number;
+  reason?: number;
   rawPayload?: Record<string, unknown>;
 }
 
@@ -82,7 +83,8 @@ export const db = {
     id: string,
     state: PaymentState,
     timestampField: "performTime" | "cancelTime",
-    timestamp: number
+    timestamp: number,
+    reason?: number
   ): Promise<Transaction | null> {
     const transaction = transactions.get(id);
     if (!transaction) {
@@ -91,12 +93,17 @@ export const db = {
 
     transaction.state = state;
     transaction[timestampField] = transaction[timestampField] ?? timestamp;
+    if (reason !== undefined) {
+      transaction.reason = transaction.reason ?? reason;
+    }
     return transaction;
   },
   async statement(from: number, to: number): Promise<Transaction[]> {
-    return [...transactions.values()].filter((transaction) => {
-      return transaction.createTime >= from && transaction.createTime <= to;
-    });
+    return [...transactions.values()]
+      .filter((transaction) => {
+        return transaction.createTime >= from && transaction.createTime <= to;
+      })
+      .sort((a, b) => a.createTime - b.createTime);
   },
   async recordAudit(input: Omit<AuditEvent, "createdAt">): Promise<void> {
     auditEvents.push({ ...input, createdAt: new Date() });

@@ -254,7 +254,7 @@ function createSandboxMerchant() {
 
 describe("Payme sandbox validation harness", () => {
   it("simulates full merchant flow and captures sanitized request/response logs", async () => {
-    const provider = new PaymeProvider({ merchantId: "sandbox-merchant", secretKey: SECRET });
+    const provider = new PaymeProvider({ merchantId: "sandbox-merchant", secretKey: SECRET, transactionTimeoutMs: 0 });
     const sandbox = createSandboxMerchant();
     const logs: SandboxLogEntry[] = [];
 
@@ -345,7 +345,7 @@ describe("Payme sandbox validation harness", () => {
   });
 
   it("validates duplicate CreateTransaction, PerformTransaction, and CancelTransaction responses", async () => {
-    const provider = new PaymeProvider({ merchantId: "sandbox-merchant", secretKey: SECRET });
+    const provider = new PaymeProvider({ merchantId: "sandbox-merchant", secretKey: SECRET, transactionTimeoutMs: 0 });
     const sandbox = createSandboxMerchant();
 
     async function call(body: PaymeSandboxPayload): Promise<PaymeJsonRpcResponse> {
@@ -408,7 +408,7 @@ describe("Payme sandbox validation harness", () => {
   });
 
   it("validates amount and auth failures against Payme expected error shape", async () => {
-    const provider = new PaymeProvider({ merchantId: "sandbox-merchant", secretKey: SECRET });
+    const provider = new PaymeProvider({ merchantId: "sandbox-merchant", secretKey: SECRET, transactionTimeoutMs: 0 });
     const sandbox = createSandboxMerchant();
 
     const floatAmount = await provider.handleRequest(

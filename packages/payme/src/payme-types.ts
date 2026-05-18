@@ -123,8 +123,25 @@ export interface PaymeGetStatementResult {
   transactions: PaymeStatementTransaction[];
 }
 
+/**
+ * Default transaction timeout: 12 hours in milliseconds.
+ * Payme documentation specifies that merchants should reject CreateTransaction
+ * requests where the provider-issued timestamp is older than this threshold.
+ */
+export const PAYME_DEFAULT_TRANSACTION_TIMEOUT_MS = 43_200_000;
+
 export interface PaymeProviderOptions {
   merchantId: string;
   secretKey: string;
   basicAuthUsername?: string;
+
+  /**
+   * Maximum age of a CreateTransaction provider timestamp before the SDK
+   * automatically rejects it with CANNOT_PERFORM. Defaults to 12 hours
+   * (43,200,000 ms) per Payme documentation.
+   *
+   * Set to `0` to disable the SDK-level timeout check entirely and handle
+   * it in your own callbacks.
+   */
+  transactionTimeoutMs?: number;
 }
