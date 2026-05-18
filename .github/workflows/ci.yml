@@ -47,3 +47,6 @@ jobs:
           pnpm --filter @uz-payments/payme exec npm pack --dry-run
           pnpm --filter @uz-payments/express exec npm pack --dry-run
           pnpm --filter @uz-payments/next exec npm pack --dry-run
+
+      - name: Smoke install assessment
+        run: pnpm smoke:pack

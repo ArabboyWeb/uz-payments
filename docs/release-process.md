@@ -25,9 +25,10 @@ pnpm build
 pnpm smoke:pack
 ```
 
-## 2. Sandbox Validation 
+## 2. Sandbox Validation
 
-Do NOT publish if a new architecture/flow feature was added without running it through real Payme Sandbox tests. 
+Do NOT publish if a new architecture/flow feature was added without running it through real Payme Sandbox tests.
+
 - Ensure `docs/final-validation-report.md` reflects live sandbox testing states depending on the nature of the change.
 
 ## 3. Version Bumping
@@ -46,8 +47,9 @@ After local tests pass and CI passes (`.github/workflows/ci.yml`), you can publi
 pnpm -r publish --access public
 ```
 
-*Note: Since the packages are intertwined, it is highly recommended to use a unified version matching system (e.g. all 0.1.0).*
+_Note: Since the packages are intertwined, it is highly recommended to use a unified version matching system (e.g. all 0.1.0)._
 
-> **Publish Rules:** 
-> - A release MUST NOT contain mock implementations or non-functional gateway stub code packaged dynamically. 
+> **Publish Rules:**
+>
+> - A release MUST NOT contain mock implementations or non-functional gateway stub code packaged dynamically.
 > - Documentation MUST not claim full enterprise-readiness without explicit warnings regarding application-side requirements (idempotency, amounts validation, durable persistence).

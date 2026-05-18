@@ -1,7 +1,7 @@
 # Final Validation Report
 
 **Date:** 2026-05-18
-**Commit Hash:** N/A (Local workspace check)
+**Commit Hash:** to be filled after final CI commit
 
 ## Commands Run & Results
 
@@ -12,12 +12,12 @@
 5. `pnpm test` — **PASS** (Total tests: 60)
 6. `pnpm build` — **PASS**
 7. `pnpm pack --dry-run` — **PASS** (all 4 packages valid via manual validation)
-8. `pnpm smoke:pack` — **PASS** 
+8. `pnpm smoke:pack` — **PASS**
 
 ## Sandbox Validation Status
 
 **Pending**: Simulated only.
-A local offline harness successfully mocked Payme callbacks and ensured the SDK adheres perfectly to Payme specs (12-hour timeout, tiyin positive validation, signature encoding). However, real Payme-hosted Sandbox integration validations remain pending since they require official Payme Merchant registration credentials to execute a live ingress test. 
+A local offline harness successfully mocked Payme callbacks and ensured the SDK adheres perfectly to Payme specs (12-hour timeout, tiyin positive validation, signature encoding). However, real Payme-hosted Sandbox integration validations remain pending since they require official Payme Merchant registration credentials to execute a live ingress test.
 
 ## Remaining Risks
 

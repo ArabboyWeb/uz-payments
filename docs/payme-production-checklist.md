@@ -32,7 +32,7 @@ Official documentation reviewed while hardening this SDK:
 - Payme amounts are positive integer tiyin values.
 - [ ] Validate order availability (e.g., `status = "pending"`, items in stock).
 - [ ] Enforce idempotency: repeated CreateTransaction with the same transaction ID must return the same stored transaction.
-- [ ] Refuse the transaction if the application `order.amount` does not perfectly match `amount` (returning `-31001` / `INVALID_AMOUNT`). 
+- [ ] Refuse the transaction if the application `order.amount` does not perfectly match `amount` (returning `-31001` / `INVALID_AMOUNT`).
 
 ## PerformTransaction Validation
 

@@ -44,7 +44,7 @@ async function main() {
   try {
     // 3. Initialize package.json and install tarballs
     execSync("npm init -y", { cwd: tempDir, stdio: "ignore" });
-    
+
     // Install typescript and types
     console.log("Installing typescript and types dependencies...");
     execSync("npm install typescript @types/node @types/express", {
@@ -53,12 +53,13 @@ async function main() {
     });
 
     console.log("Installing packed tarballs...");
-    const tarballPaths = tarballs.map(t => `"${t}"`).join(" ");
+    const tarballPaths = tarballs.map((t) => `"${t}"`).join(" ");
     execSync(`npm install ${tarballPaths}`, { cwd: tempDir, stdio: "inherit" });
 
-    // Ensure we also install needed peer/transitive dependencies if missing
-    // (Zod is a dependency of core/payme, next is needed as devDependency to avoid type errors)
-    execSync("npm install zod express next", {
+    // We explicitly install `express` as it is a peerDependency of @uz-payments/express.
+    // We do NOT install `zod` manually, because it must be properly resolved as a standard dependency of @uz-payments/payme.
+    // We do NOT install `next`, because @uz-payments/next only relies on standard Web APIs (Request/Response).
+    execSync("npm install express tsx", {
       cwd: tempDir,
       stdio: "inherit"
     });
@@ -122,7 +123,9 @@ console.log(provider.name);
     for (const tgz of tarballs) {
       try {
         await fs.rm(tgz, { force: true });
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
   }
 }

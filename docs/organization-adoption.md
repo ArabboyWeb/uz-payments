@@ -25,14 +25,14 @@ You are ready to adopt `uz-payments` into an organizational production flow when
 1. You have fully successfully passed the Payme Business sandbox testing tools.
 2. You have implemented robust `toPaymeState()` mapping according to the cancellation scenarios mapped out in the docs.
 3. You have read and fulfilled the `docs/payme-production-checklist.md`.
-4. Your application validates that `amount` corresponds perfectly with the real cart/order amount stored in your system *before* authorizing creation.
+4. Your application validates that `amount` corresponds perfectly with the real cart/order amount stored in your system _before_ authorizing creation.
 
 ## Deployment Responsibilities
 
 Organizations should ensure they have:
 
-* **Monitoring**: Set up error alerts when `PaymeMerchantError` instances are constructed.
-* **Alerting**: Alert on repeated cancellation or fallback behavior.
-* **Backups**: Ensure payment database tables are strictly backed up with point-in-time recovery.
-* **Reconciliation**: Setup daily automatic or manual reconciliation checking your DB amounts against the operator UI dashboard.
-* **Incident Response**: Have a rollback mechanism and access to Payme dashboards to verify out-of-sync states manually if anomalies happen.
+- **Monitoring**: Set up error alerts when `PaymeMerchantError` instances are constructed.
+- **Alerting**: Alert on repeated cancellation or fallback behavior.
+- **Backups**: Ensure payment database tables are strictly backed up with point-in-time recovery.
+- **Reconciliation**: Setup daily automatic or manual reconciliation checking your DB amounts against the operator UI dashboard.
+- **Incident Response**: Have a rollback mechanism and access to Payme dashboards to verify out-of-sync states manually if anomalies happen.
